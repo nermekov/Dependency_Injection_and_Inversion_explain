@@ -2,7 +2,6 @@ package com.example.dv
 
 import android.content.Context
 import android.os.Bundle
-import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.MutableLiveData
 import com.example.dv.impl.*
@@ -130,9 +129,26 @@ class MPresenter(
 )
 
 /*
+Бонус: mini overview лекции Льва Екасова https://www.youtube.com/watch?v=TbEH1Upqrh
+Что нам даёт Dependency Injection
+- Внедрение зависимостей избавляет от копипасты создания сложного объекта с большим количеством аргументов
+- Позволяет переиспользоваться объекты и зависимости:
+ - экономия alloc - содание нового объекта в оперативке это дорого
+ - позволяет использовать в репозитории кэш в переменных
+- создаёт независимость от имплементации
+- облегчает тестирование
+ */
+/*
+DI Руками - проблемы:
+- сложно создать большой граф зависимостей(Все виды data source(API, BD), repositories)
+- сложно переиспользовать части графа зависисостей
+- портянка кода создания зависимостей дублируется и в тестах
+ */
+
+/*
 Источники
-* https://betterprogramming.pub/what-is-dependency-injection-b2671b1ea90a
+https://betterprogramming.pub/what-is-dependency-injection-b2671b1ea90a
 https://betterprogramming.pub/five-principles-of-dependency-injection-5bd0cca9cb04
-https://medium.com/@kedren.villena/simplifying-dependency-inversion-principle-dip-59228122649a
-* https://habr.com/ru/post/465395/
+https://habr.com/ru/post/465395/
+https://www.youtube.com/watch?v=TbEH1UpqrhM
 * */
