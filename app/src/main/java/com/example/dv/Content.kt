@@ -38,28 +38,32 @@ class Presenter3(smsSubscription: GmsSmsSubscription)
 
 //good
 class Presenter4(smsSubscription: SmsSubscription)
-
 /*
-3. DI помогает писать код с низкой связанностью(картинка)
+3. DInjection помогает писать код с низкой связанностью(картинка)
 DI простым языком - это получение зависимостей снаружи объекта
 через конструктор или сеттеры
  */
 
 /*
 4. избегать "new", ожидать объекты через конструктор (Dependency Injection)
+!!Не обязательно работает через конструктор.
  */
 //bad
 class Presenter5(context: Context) {
     //похоже что для переменной удалось соболюсти inversion
     //но всё таки есть импорт реализации
     val smsSubscription: SmsSubscription? = GmsSmsSubscription(context, {})
+    /**
+     * some logic
+     */
 }
 
 //good
+//!!Необходимо показать как посылаем объект в презентер
 class Presenter6(
     context: Context,
     //Предоставить отдать объект DI
-    private val smsSubscription: SmsSubscription
+    private val smsSubscription: SmsSubscription,
     //Либо Factory, если надо постоянно содавать новую подписку
     //SmsSubscriptionFactory { fun create(): SmsSubscription }
 ) {
@@ -117,6 +121,9 @@ class MPresenter(
     someRepository: SomeRepository,
 
     //юзкейсы и другая бизнес логика
+    //Сложные объекты для которых нужен длинный конструктор
+    //или DI
+    //?
     someUseCase: SomeUseCase,
 
     /* типы, которые требуют шейринга объектов
@@ -132,10 +139,13 @@ class MPresenter(
 Бонус: mini overview лекции Льва Екасова https://www.youtube.com/watch?v=TbEH1Upqrh
 Что нам даёт Dependency Injection
 - Внедрение зависимостей избавляет от копипасты создания сложного объекта с большим количеством аргументов
-- Позволяет переиспользоваться объекты и зависимости:
+- Позволяет переиспользовать объекты и зависимости:
+//!!чисто под аннотацию Синглтона
  - экономия alloc - содание нового объекта в оперативке это дорого
+ //!!чисто под аннотацию Синглтона
  - позволяет использовать в репозитории кэш в переменных
-- создаёт независимость от имплементации
+ //!!Dependency Inversion
+- создаёт независимость от имплементации()
 - облегчает тестирование
  */
 /*
