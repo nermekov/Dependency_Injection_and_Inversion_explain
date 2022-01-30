@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.MutableLiveData
 import com.example.dv.impl.*
+import java.util.function.Predicate
 
 /*
 Метафора про провода и розетки
@@ -13,57 +14,57 @@ import com.example.dv.impl.*
 /*
 1. Не зависеть от имплементации. Принцип Dependency Inversion(картинка)
  */
-interface SmsSubscription {
-    fun unsubscribe()
+interface SmsService {
 }
 
 //good
 class Presenter {
     //Не знаем это GMS/HMS или другие подробности реализации
-    var smsSubscription: SmsSubscription? = null
+    var smsService: SmsService? = null
 }
 
 //bad
 class Presenter2 {
     //Зависим от реализации напрямую
-    //можно посмотреть, интересная реализация
-    var smsSubscription: GmsSmsSubscription? = null
+    var smsSubscription: BeelineSmsService? = null
 }
 
 /*
-2. Просить только интерфейсы в конструкторе.
+2. аналогично в конструкторах или setters.
  */
 //bad
-class Presenter3(smsSubscription: GmsSmsSubscription)
+class Presenter3(smsSubscription: BeelineSmsService)
 
 //good
-class Presenter4(smsSubscription: SmsSubscription)
+class Presenter4(smsService: SmsService)
+
 /*
 3. DInjection помогает писать код с низкой связанностью(картинка)
 DI простым языком - это получение зависимостей снаружи объекта
 через конструктор или сеттеры
  */
 
+//пример Di руками, когда руками внедряем зависимости
+fun createObject(context: Context) {
+    val repository = BeelineSmsService(context) {}
+    Presenter6(context, repository)
+}
+
 /*
-4. избегать "new", ожидать объекты через конструктор (Dependency Injection)
-!!Не обязательно работает через конструктор.
+4. избегать "new", ожидать объекты через конструктор или setter (Dependency Injection)
  */
 //bad
 class Presenter5(context: Context) {
     //похоже что для переменной удалось соболюсти inversion
     //но всё таки есть импорт реализации
-    val smsSubscription: SmsSubscription? = GmsSmsSubscription(context, {})
-    /**
-     * some logic
-     */
+    val smsService: SmsService = BeelineSmsService(context, {})
 }
 
 //good
-//!!Необходимо показать как посылаем объект в презентер
 class Presenter6(
     context: Context,
     //Предоставить отдать объект DI
-    private val smsSubscription: SmsSubscription,
+    private val smsService: SmsService,
     //Либо Factory, если надо постоянно содавать новую подписку
     //SmsSubscriptionFactory { fun create(): SmsSubscription }
 ) {
@@ -123,7 +124,6 @@ class MPresenter(
     //юзкейсы и другая бизнес логика
     //Сложные объекты для которых нужен длинный конструктор
     //или DI
-    //?
     someUseCase: SomeUseCase,
 
     /* типы, которые требуют шейринга объектов
@@ -132,20 +132,14 @@ class MPresenter(
 
     //Отправка почт/смс итп должна быть завёрнута
     // в абстракции и тоже передаваться через di,
-    smsSubscription: SmsSubscription
+    smsService: SmsService
 )
 
 /*
 Бонус: mini overview лекции Льва Екасова https://www.youtube.com/watch?v=TbEH1Upqrh
 Что нам даёт Dependency Injection
 - Внедрение зависимостей избавляет от копипасты создания сложного объекта с большим количеством аргументов
-- Позволяет переиспользовать объекты и зависимости:
-//!!чисто под аннотацию Синглтона
- - экономия alloc - содание нового объекта в оперативке это дорого
- //!!чисто под аннотацию Синглтона
- - позволяет использовать в репозитории кэш в переменных
- //!!Dependency Inversion
-- создаёт независимость от имплементации()
+- Позволяет переиспользовать объекты и зависимости, управлять их жизненным циклом снаружи объекта
 - облегчает тестирование
  */
 /*
